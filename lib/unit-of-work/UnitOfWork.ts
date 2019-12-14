@@ -41,7 +41,7 @@ export class UnitOfWork {
     this.identityMap[`${wrapped.constructor.name}-${wrapped.__serializedPrimaryKey}`] = wrapped;
 
     if (!this.originalEntityData[wrapped.__uuid] || mergeData) {
-      this.originalEntityData[wrapped.__uuid] = Utils.prepareEntity(entity, this.metadata);
+      this.originalEntityData[wrapped.__uuid] = Utils.prepareEntity(entity, this.metadata, this.platform);
     }
 
     this.cascade(entity, Cascade.MERGE, visited);
@@ -201,7 +201,7 @@ export class UnitOfWork {
     if (changeSet) {
       this.changeSets.push(changeSet);
       this.cleanUpStack(this.persistStack, wrapped);
-      this.originalEntityData[wrapped.__uuid] = Utils.prepareEntity(entity, this.metadata);
+      this.originalEntityData[wrapped.__uuid] = Utils.prepareEntity(entity, this.metadata, this.platform);
     }
   }
 
@@ -263,7 +263,7 @@ export class UnitOfWork {
       await Utils.runSerial(hooks[type]!, hook => (entity[hook] as unknown as () => Promise<any>)());
 
       if (payload) {
-        Object.assign(payload, Utils.diffEntities(copy, entity, this.metadata));
+        Object.assign(payload, Utils.diffEntities(copy, entity, this.metadata, this.platform));
       }
     }
   }
